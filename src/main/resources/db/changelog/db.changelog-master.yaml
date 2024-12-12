@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - logicalFilePath: db/changelog/db.changelog-lesson1.yaml
+  - changeSet:
+      id: 1
+      author: Mellerh
+      changes:
+        - createTable:
+            tableName: wallet
+            columns:
+              - column:
+                  name: wallet_uuid
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: amount
+                  type: DECIMAL
+                  constraints:
+                    nullable: false
