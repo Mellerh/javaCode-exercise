@@ -12,6 +12,7 @@ import javacode.wallet.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -51,17 +52,17 @@ public class WalletServiceImpl implements WalletService {
 
 
         if (walletUpdateDto.getOperationType() == OperationType.DEPOSIT) {
-            wallet.setAmount(wallet.getAmount().add(walletUpdateDto.getAmount()));
+            wallet.setAmount(wallet.getAmount().add(BigDecimal.valueOf(walletUpdateDto.getAmount())));
             return WalletMapper.toWalletResponseDto(walletRepository.save(wallet));
 
         } else if (walletUpdateDto.getOperationType() == OperationType.WITHDRAW) {
 
-            if (wallet.getAmount().compareTo(walletUpdateDto.getAmount()) < 1) {
+            if (wallet.getAmount().compareTo(BigDecimal.valueOf(walletUpdateDto.getAmount())) < 0) {
                 throw new BadRequestException("Сумма, которую вы пытаетесь снять больше той, что лежит на счёте. " +
                         "Текущая сумма на счёте " + wallet.getAmount());
             }
 
-            wallet.setAmount(wallet.getAmount().subtract(walletUpdateDto.getAmount()));
+            wallet.setAmount(wallet.getAmount().subtract(BigDecimal.valueOf(walletUpdateDto.getAmount())));
 
             return WalletMapper.toWalletResponseDto(walletRepository.save(wallet));
 

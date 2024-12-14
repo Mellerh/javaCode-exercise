@@ -10,27 +10,35 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping(path = "/api/v1")
 @Validated
 @RequiredArgsConstructor
 public class WalletController {
 
     private final WalletService walletService;
 
-    @GetMapping("/wallets/{WALLET_UUID}")
-    public WalletResponseDto getWalletByUUID(@PathVariable String uuid) {
-        return walletService.getWalletByUUID(uuid);
-    }
-
     @PostMapping("/wallet")
     public WalletResponseDto createNewWallet(@Valid @RequestBody WalletCreateDto walletRequestDto) {
         return walletService.createNewWallet(walletRequestDto);
     }
 
+    @GetMapping("/wallets/{WALLET_UUID}")
+    public WalletResponseDto getWalletByUUID(@PathVariable String WALLET_UUID) {
+        return walletService.getWalletByUUID(WALLET_UUID);
+    }
+
+
     @PatchMapping("/wallets/{WALLET_UUID}")
-    public WalletResponseDto updateWallet(@PathVariable String uuid,
+    public WalletResponseDto updateWallet(@PathVariable String WALLET_UUID,
                                           @Valid @RequestBody WalletUpdateDto walletUpdateDto) {
-        return walletService.updateWallet(uuid, walletUpdateDto);
+        return walletService.updateWallet(WALLET_UUID, walletUpdateDto);
     }
 
 }
+
+
+//{
+//        "walletId": "550e8400-e29b-41d4-a716-446655440000",
+//        "operationType": "DEPOSIT",
+//        "amount": 1000
+//}
