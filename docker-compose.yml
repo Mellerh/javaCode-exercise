@@ -1,0 +1,32 @@
+services:
+
+  db-javacode: # имя сервиса. Оно может быть любым
+    image: postgres:16.1
+    container_name: db-javacode
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=javacode
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=1234
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db-javacode:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-javacode/javacode
+    ports:
+      - "8080:8080"
+    links:
+      - db-javacode

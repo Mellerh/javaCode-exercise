@@ -1,12 +1,15 @@
+package controller;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import javacode.JavaCodeApp;
 import javacode.wallet.dto.WalletCreateDto;
-import javacode.wallet.dto.WalletMapper;
 import javacode.wallet.dto.WalletResponseDto;
 import javacode.wallet.dto.WalletUpdateDto;
+import javacode.wallet.exceptions.BadRequestException;
+import javacode.wallet.exceptions.NotFoundException;
 import javacode.wallet.model.OperationType;
 import javacode.wallet.model.Wallet;
 import javacode.wallet.repository.WalletRepository;
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
@@ -28,12 +32,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @AutoConfigureCache
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @SpringBootTest(classes = JavaCodeApp.class)
+@AutoConfigureMockMvc
 public class WalletApplicationTest {
 
     private static Validator validator;
     private final WalletService walletService;
     private final WalletRepository repository;
-    private final WalletMapper walletMapper;
     private Wallet wallet;
     private WalletCreateDto createDtoCorrect;
     private WalletCreateDto createDtoUnCorrect;
@@ -119,8 +123,42 @@ public class WalletApplicationTest {
 
     }
 
-//    @Test
-//    @DisplayName("Создаём пользователя с такиж же ID и пытаемся снять сумму больше, чем есть на счёте")
+    @Test
+    @DisplayName("Создаём wallet с такиж же ID")
+    public void testCreateSameWalletTwiceAndWithdrawExtraSum() {
+        initCorrectDto();
+        walletService.createNewWallet(createDtoCorrect);
+
+        Assertions.assertThrows(
+                BadRequestException.class,
+                () -> walletService.createNewWallet(createDtoCorrect),
+                "должно быть выброшено исключение из-за создания wallet с тем же id");
+
+    }
+
+    @Test
+    @DisplayName("Ищем несущетсвующий wallet")
+    public void testFindNotExistingWallet() {
+        Assertions.assertThrows(
+                NotFoundException.class,
+                () -> walletService.getWalletByUUID("550e8400-e29b-41d4-a716-446655449999"),
+                "должно быть выброшено исключение из-за поиска несуществующего wallet");
+    }
+
+    @Test
+    @DisplayName("Сниманием сумму больше, чем есть на счёте")
+    public void testWithdrawExtraSum() {
+        initCorrectDto();
+        walletService.createNewWallet(createDtoCorrect);
+
+        initUpdateDtoWithdraw();
+        updateDto.setAmount(1500L);
+
+        Assertions.assertThrows(BadRequestException.class,
+                () -> walletService.updateWallet(createDtoCorrect.getWalletId(), updateDto),
+                "должно быть выброшено исключения из-за превышения суммы снятия");
+
+    }
 
 
     private void initCorrectDto() {

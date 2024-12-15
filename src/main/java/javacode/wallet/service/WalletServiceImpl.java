@@ -50,12 +50,13 @@ public class WalletServiceImpl implements WalletService {
         Wallet wallet = walletRepository.findById(uuid).orElseThrow(()
                 -> new NotFoundException("Wallet с uuid " + uuid + " не найден."));
 
-
         if (walletUpdateDto.getOperationType() == OperationType.DEPOSIT) {
             wallet.setAmount(wallet.getAmount().add(BigDecimal.valueOf(walletUpdateDto.getAmount())));
             return WalletMapper.toWalletResponseDto(walletRepository.save(wallet));
 
-        } else if (walletUpdateDto.getOperationType() == OperationType.WITHDRAW) {
+        }
+
+        if (walletUpdateDto.getOperationType() == OperationType.WITHDRAW) {
 
             if (wallet.getAmount().compareTo(BigDecimal.valueOf(walletUpdateDto.getAmount())) < 0) {
                 throw new BadRequestException("Сумма, которую вы пытаетесь снять больше той, что лежит на счёте. " +
@@ -66,9 +67,9 @@ public class WalletServiceImpl implements WalletService {
 
             return WalletMapper.toWalletResponseDto(walletRepository.save(wallet));
 
-        } else {
-            throw new BadRequestException("Неккоректный метод по работе со счётом.");
         }
+
+        throw new BadRequestException("Неккоректный метод по работе со счётом.");
 
     }
 }

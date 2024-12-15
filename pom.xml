@@ -20,6 +20,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>17</java.version>
     </properties>
 
 
@@ -100,8 +101,10 @@
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <argLine>-XX:+EnableDynamicAgentLoading</argLine>
+                    <!--                    <skipTests>true</skipTests>-->
                 </configuration>
             </plugin>
+
 
         </plugins>
     </build>
